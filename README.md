@@ -1,2 +1,3 @@
 # panicking
-Provides a `std::thread::panicking` analog available in `no_std` context.
+
+Provides a `std::thread::panicking` analog available in the `no_std` context.

@@ -1,8 +1,16 @@
 [package]
-name = "panicking"
-version = "0.1.0"
 edition = "2018"
+name = "panicking"
+version = "0.0.1"
+authors = ["warlock <internalmike@gmail.com>"]
+description = "Provides a `std::thread::panicking` analog available in the `no_std` context."
+readme = "README.md"
+documentation = "https://docs.rs/panicking/"
+keywords = ["panic", "panicking", "no_std"]
+categories = ["rust-patterns", "no-std"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/A1-Triard/panicking"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
+[features]
+default = ["std"]
+std = []
