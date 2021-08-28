@@ -47,6 +47,9 @@ pub fn panicking() -> bool {
     }
 }
 
+/// Allows an application that uses the `no_std` environment
+/// and custom panic handling system with stack unwinding
+/// to inform libraries if the stack is currently unwinding due to panic.
 pub fn set_panicking_callback(panicking: fn() -> bool) {
     let panicking: Option<fn() -> bool> = Some(panicking);
     let panicking = unsafe { transmute(panicking) };
