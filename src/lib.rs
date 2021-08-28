@@ -17,24 +17,32 @@ static PANICKING_CALLBACK: AtomicUsize = AtomicUsize::new({
 });
 
 #[cfg(not(feature="std"))]
-pub fn panicking() -> bool {
-    let panicking = PANICKING_CALLBACK.load(Ordering::Relaxed);
-    let panicking: Option<fn() -> bool> = unsafe { transmute(panicking) };
-    if let Some(panicking) = panicking {
-        panicking()
-    } else {
-        false
-    }
+#[inline]
+fn std_panicking() -> bool {
+    false
 }
 
 #[cfg(feature="std")]
+#[inline]
+fn std_panicking() -> bool {
+    std::thread::panicking()
+}
+
+/// Determines whether the current thread is unwinding because of panic.
+///
+/// In contrast with [`std::thread::panicking`](std::thread::panicking), this function
+/// can be used in `no_std` context,
+/// although the adequacy of the return value in this case is left to the developer
+/// of the final application: they supposed to use
+/// the [`set_panicking_callback`](set_panicking_callback) function
+/// to provide method for unwinding detecting.
 pub fn panicking() -> bool {
     let panicking = PANICKING_CALLBACK.load(Ordering::Relaxed);
     let panicking: Option<fn() -> bool> = unsafe { transmute(panicking) };
     if let Some(panicking) = panicking {
         panicking()
     } else {
-        std::thread::panicking()
+        std_panicking()
     }
 }
 
