@@ -30,8 +30,9 @@ fn std_panicking() -> bool {
 
 /// Determines whether the current thread is unwinding because of panic.
 ///
-/// In contrast with [`std::thread::panicking`](std::thread::panicking), this function
-/// can be used in `no_std` context,
+/// In contrast with
+/// [`std::thread::panicking`](https://doc.rust-lang.org/std/thread/fn.panicking.html),
+/// this function can be used in the `no_std` context,
 /// although the adequacy of the return value in this case is left to the developer
 /// of the final application: they supposed to use
 /// the [`set_panicking_callback`](set_panicking_callback) function
