@@ -33,9 +33,9 @@ fn std_panicking() -> bool {
 /// In contrast with
 /// [`std::thread::panicking`](https://doc.rust-lang.org/std/thread/fn.panicking.html),
 /// this function can be used in the `no_std` context,
-/// although the adequacy of the return value in this case is left to the developer
-/// of the final application: they supposed to use
-/// the [`set_panicking_callback`](set_panicking_callback) function
+/// although the adequacy of the return value in this case is left to
+/// a final application developer: they are supposed to use
+/// the [`set_panicking_callback`] function
 /// to provide method for unwinding detecting.
 pub fn panicking() -> bool {
     let panicking = PANICKING_CALLBACK.load(Ordering::Relaxed);

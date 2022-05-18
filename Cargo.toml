@@ -1,7 +1,7 @@
 [package]
 edition = "2021"
 name = "panicking"
-version = "0.0.2"
+version = "0.1.0"
 rust-version = "1.59"
 authors = ["warlock <internalmike@gmail.com>"]
 description = "Provides a `std::thread::panicking` analog available in the `no_std` context."
