@@ -62,7 +62,8 @@ pub fn panic(args: fmt::Arguments) -> ! {
 
 /// Panics the current thread.
 ///
-/// By default, calls [`std::panic!`] if the `std` feature is enabled, and [`core::panic!`] if it is not.
+/// By default, calls [`std::panic!`](https://doc.rust-lang.org/std/macro.panic.html)
+/// if the `std` feature is enabled, and [`core::panic!`] if it is not.
 /// This behavior can be overridden with [`set_panic_callback`].
 #[macro_export]
 macro_rules! panic {
