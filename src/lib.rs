@@ -8,11 +8,20 @@
 #[cfg(feature="std")]
 extern crate core;
 
+#[doc(hidden)]
+pub use core::format_args as std_format_args;
+
+use core::fmt::{self};
 use core::mem::transmute;
 use core::sync::atomic::{AtomicUsize, Ordering};
 
 static PANICKING_CALLBACK: AtomicUsize = AtomicUsize::new({
     let no_callback: Option<fn() -> bool> = None;
+    unsafe { transmute(no_callback) }
+});
+
+static PANIC_CALLBACK: AtomicUsize = AtomicUsize::new({
+    let no_callback: Option<fn(fmt::Arguments) -> !> = None;
     unsafe { transmute(no_callback) }
 });
 
@@ -26,6 +35,38 @@ fn std_panicking() -> bool {
 #[inline]
 fn std_panicking() -> bool {
     std::thread::panicking()
+}
+
+#[cfg(not(feature="std"))]
+#[inline]
+fn std_panic(args: fmt::Arguments) -> ! {
+    core::panic!("{}", args)
+}
+
+#[cfg(feature="std")]
+#[inline]
+fn std_panic(args: fmt::Arguments) -> ! {
+    std::panic!("{}", args)
+}
+
+#[doc(hidden)]
+pub fn panic(args: fmt::Arguments) -> ! {
+    let panic = PANIC_CALLBACK.load(Ordering::Relaxed);
+    let panic: Option<fn(fmt::Arguments) -> !> = unsafe { transmute(panic) };
+    if let Some(panic) = panic {
+        panic(args)
+    } else {
+        std_panic(args)
+    }
+}
+
+/// Panics the current thread.
+///
+/// By default, calls [`std::panic!`] if the `std` feature is enabled, and [`core::panic!`] if it is not.
+/// This behavior can be overridden with [`set_panic_callback`].
+#[macro_export]
+macro_rules! panic {
+    ($fmt:expr $(, $($args:tt)*)?) => { $crate::panic($crate::std_format_args!($fmt $(, $($args)*)?)) };
 }
 
 /// Determines whether the current thread is unwinding because of panic.
@@ -45,6 +86,13 @@ pub fn panicking() -> bool {
     } else {
         std_panicking()
     }
+}
+
+/// Allows to change the [`panic!`] macro behavior.
+pub fn set_panic_callback(panic: fn(fmt::Arguments) -> !) {
+    let panic: Option<fn(fmt::Arguments) -> !> = Some(panic);
+    let panic = unsafe { transmute(panic) };
+    PANIC_CALLBACK.store(panic, Ordering::Relaxed);
 }
 
 /// Allows an application that uses the `no_std` environment
