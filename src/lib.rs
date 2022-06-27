@@ -4,7 +4,7 @@
 //! Enabled by default. Disable to make the library `#![no_std]`.
 //!
 //! * `"abort"`
-//! Enable to link the library with (unstable) `panic_abort` standard
+//! Enable to link the library with the (unstable) `panic_abort` standard
 //! crate, and make [`panicking`] always return `false`.
 
 #![cfg_attr(feature="abort", feature(panic_abort))]
