@@ -23,7 +23,7 @@ extern crate core;
 extern crate panic_abort;
 
 #[cfg(all(not(feature="abort"), not(feature="std")))]
-extern {
+extern "Rust" {
     fn rust_panicking() -> bool;
 }
 

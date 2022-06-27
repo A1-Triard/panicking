@@ -35,12 +35,12 @@ mod no_std {
     }
 
     #[no_mangle]
-    fn rust_oom(_layout: Layout) -> ! {
+    extern "Rust" fn rust_oom(_layout: Layout) -> ! {
         unsafe { exit(98) }
     }
 
     #[no_mangle]
-    extern fn rust_panicking() -> bool {
+    extern "Rust" fn rust_panicking() -> bool {
         false
     }
 }
