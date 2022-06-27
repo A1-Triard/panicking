@@ -1,3 +1,12 @@
+//! **Crate features**
+//!
+//! * `"std"`
+//! Enabled by default. Disable to make the library `#![no_std]`.
+//!
+//! * `"abort"`
+//! Enable to link the library with (unstable) `panic_abort` standard
+//! crate, and make [`panicking`] always return `false`.
+
 #![cfg_attr(feature="abort", feature(panic_abort))]
 
 #![deny(warnings)]
@@ -42,9 +51,9 @@ fn panicking_raw() -> bool {
 /// [`std::thread::panicking`](https://doc.rust-lang.org/std/thread/fn.panicking.html),
 /// this function can be used in the `no_std` context,
 /// although the adequacy of the return value in this case is left to
-/// a final application developer: they are supposed to use
-/// the [`set_panicking_callback`] function
-/// to provide method for unwinding detecting.
+/// a final application developer: they are supposed to provide
+/// the `extern fn rust_panicking() -> bool` function
+/// for unwinding detecting.
 #[inline]
 pub fn panicking() -> bool {
     panicking_raw()
