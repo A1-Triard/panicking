@@ -52,7 +52,7 @@ fn panicking_raw() -> bool {
 /// this function can be used in the `no_std` context,
 /// although the adequacy of the return value in this case is left to
 /// a final application developer: they are supposed to provide
-/// the `extern fn rust_panicking() -> bool` function
+/// the `#[no_mangle] extern fn rust_panicking() -> bool` function
 /// for unwinding detecting.
 #[inline]
 pub fn panicking() -> bool {
