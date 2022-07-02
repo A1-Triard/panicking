@@ -122,7 +122,9 @@ mod i {
     }
 }
 
-/// Panic payload. This type cannot be explicitly created,
+/// Panic payload.
+///
+/// This type cannot be explicitly created,
 /// and its only purpose is to be returned from [`catch_unwind`],
 /// and then passed to [`resume_unwind`].
 pub struct Error(i::Error);
@@ -149,11 +151,15 @@ pub fn panicking() -> bool {
 
 /// Invokes a closure, capturing the cause of an unwinding panic if one occurs.
 ///
-/// This function will return Ok with the closure’s result if
+/// This function will return `Ok` with the closure’s result if
 /// the closure does not panic, and will return `Err(_)` if the closure panics.
 ///
 /// If this function returns an `Err`, the error value should be further passed
 /// to [`resume_unwind`].
+///
+/// In contrast with
+/// [`std::panic::catch_unwind`](https://doc.rust-lang.org/std/panic/fn.catch_unwind.html),
+/// this function can be used in the `no_std` context.
 #[inline]
 pub fn catch_unwind<T>(f: impl FnOnce() -> T + UnwindSafe) -> Result<T, Error> {
     i::catch_unwind(f).map_err(Error)
