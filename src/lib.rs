@@ -1,5 +1,5 @@
 //! **Crate features**
-//!
+
 //! * `"std"`
 //! Enabled by default. Disable to make the library `#![no_std]`.
 //!
@@ -28,74 +28,114 @@ extern crate panic_abort;
 use core::panic::UnwindSafe;
 
 #[cfg(all(not(feature="abort"), not(feature="std")))]
-extern "Rust" {
-    fn rust_panicking_neither_abort_nor_std_feature_enabled() -> !;
-}
+mod i {
+    use core::panic::UnwindSafe;
 
-#[cfg(all(not(feature="abort"), not(feature="std")))]
-#[inline]
-fn panicking_raw() -> bool {
-    unsafe { rust_panicking_neither_abort_nor_std_feature_enabled() }
-}
+    pub type Error = !;
 
-#[cfg(all(not(feature="abort"), not(feature="std")))]
-#[inline]
-fn catch_unwind_raw<T>(f: impl FnOnce() -> T + UnwindSafe) -> Result<T, RawError> {
-    unsafe { rust_panicking_neither_abort_nor_std_feature_enabled() }
-}
+    pub fn error_into_raw(e: Error) -> usize {
+        e
+    }
 
-#[cfg(all(not(feature="abort"), not(feature="std")))]
-#[inline]
-fn resume_unwind_raw(payload: RawError) -> ! {
-    unsafe { rust_panicking_neither_abort_nor_std_feature_enabled() }
+    pub unsafe fn error_from_raw(e: usize) -> Error {
+        unreachable_unchecked()
+    }
+
+    extern "Rust" {
+        fn rust_panicking_neither_abort_nor_std_feature_enabled() -> !;
+    }
+
+    #[inline]
+    pub fn panicking() -> bool {
+        unsafe { rust_panicking_neither_abort_nor_std_feature_enabled() }
+    }
+
+    #[inline]
+    pub fn catch_unwind<T>(f: impl FnOnce() -> T + UnwindSafe) -> Result<T, Error> {
+        unsafe { rust_panicking_neither_abort_nor_std_feature_enabled() }
+    }
+
+    #[inline]
+    pub fn resume_unwind(payload: Error) -> ! {
+        unsafe { rust_panicking_neither_abort_nor_std_feature_enabled() }
+    }
 }
 
 #[cfg(all(feature="std", not(feature="abort")))]
-#[inline]
-fn panicking_raw() -> bool {
-    std::thread::panicking()
-}
+mod i {
+    use core::panic::UnwindSafe;
+    use std::any::Any;
 
-#[cfg(all(feature="std", not(feature="abort")))]
-#[inline]
-fn catch_unwind_raw<T>(f: impl FnOnce() -> T + UnwindSafe) -> Result<T, RawError> {
-    std::panic::catch_unwind(f)
-}
+    pub type Error = Box<dyn Any + Send + 'static>;
 
-#[cfg(all(feature="std", not(feature="abort")))]
-#[inline]
-fn resume_unwind_raw(payload: RawError) -> ! {
-    std::panic::resume_unwind(payload)
+    pub fn error_into_raw(e: Error) -> usize {
+        Box::into_raw(Box::new(e)) as usize
+    }
+
+    pub unsafe fn error_from_raw(e: usize) -> Error {
+        *Box::from_raw(e as *mut Error)
+    }
+
+    #[inline]
+    pub fn panicking() -> bool {
+        std::thread::panicking()
+    }
+
+    #[inline]
+    pub fn catch_unwind<T>(f: impl FnOnce() -> T + UnwindSafe) -> Result<T, Error> {
+        std::panic::catch_unwind(f)
+    }
+
+    #[inline]
+    pub fn resume_unwind(payload: Error) -> ! {
+        std::panic::resume_unwind(payload)
+    }
 }
 
 #[cfg(feature="abort")]
-#[inline]
-fn panicking_raw() -> bool {
-    false
+mod i {
+    use core::panic::UnwindSafe;
+
+    pub type Error = !;
+
+    pub fn error_into_raw(e: Error) -> usize {
+        e
+    }
+
+    pub unsafe fn error_from_raw(e: usize) -> Error {
+        unreachable_unchecked()
+    }
+
+    #[inline]
+    pub fn panicking() -> bool {
+        false
+    }
+
+    #[inline]
+    pub fn catch_unwind<T, E>(f: impl FnOnce() -> T + UnwindSafe) -> Result<T, Error> {
+        Ok(f())
+    }
+
+    #[inline]
+    pub fn resume_unwind(payload: Error) -> ! {
+        payload
+    }
 }
-
-#[cfg(feature="abort")]
-#[inline]
-fn catch_unwind_raw<T, E>(f: impl FnOnce() -> T + UnwindSafe) -> Result<T, RawError> {
-    Ok(f())
-}
-
-#[cfg(feature="abort")]
-#[inline]
-fn resume_unwind_raw(payload: RawError) -> ! {
-    payload
-}
-
-#[cfg(all(feature="std", not(feature="abort")))]
-type RawError = std::boxed::Box<dyn std::any::Any + Send + 'static>;
-
-#[cfg(any(not(feature="std"), feature="abort"))]
-type RawError = !;
 
 /// Panic payload. This type cannot be explicitly created,
 /// and its only purpose is to be returned from [`catch_unwind`],
 /// and then passed to [`resume_unwind`].
-pub struct Error(RawError);
+pub struct Error(i::Error);
+
+impl Error {
+    pub fn into_raw(self) -> usize {
+        i::error_into_raw(self.0)
+    }
+
+    pub unsafe fn from_raw(error: usize) -> Self {
+        Error(i::error_from_raw(error))
+    }
+}
 
 /// Determines whether the current thread is unwinding because of panic.
 ///
@@ -104,7 +144,7 @@ pub struct Error(RawError);
 /// this function can be used in the `no_std` context.
 #[inline]
 pub fn panicking() -> bool {
-    panicking_raw()
+    i::panicking()
 }
 
 /// Invokes a closure, capturing the cause of an unwinding panic if one occurs.
@@ -116,7 +156,7 @@ pub fn panicking() -> bool {
 /// to [`resume_unwind`].
 #[inline]
 pub fn catch_unwind<T>(f: impl FnOnce() -> T + UnwindSafe) -> Result<T, Error> {
-    catch_unwind_raw(f).map_err(Error)
+    i::catch_unwind(f).map_err(Error)
 }
 
 /// Triggers a panic without invoking the panic hook.
@@ -129,5 +169,5 @@ pub fn catch_unwind<T>(f: impl FnOnce() -> T + UnwindSafe) -> Result<T, Error> {
 /// this function can be used in the `no_std` context.
 #[inline]
 pub fn resume_unwind(payload: Error) -> ! {
-    resume_unwind_raw(payload.0)
+    i::resume_unwind(payload.0)
 }
