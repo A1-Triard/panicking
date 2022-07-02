@@ -33,13 +33,13 @@ mod i {
     use core::hint::unreachable_unchecked;
     use core::panic::UnwindSafe;
 
-    pub type Error = !;
+    pub enum Error { }
 
-    pub fn error_into_raw(e: Error) -> usize {
-        e
+    pub fn error_into_raw(_: Error) -> usize {
+        unsafe { unreachable_unchecked() }
     }
 
-    pub unsafe fn error_from_raw(e: usize) -> Error {
+    pub unsafe fn error_from_raw(_: usize) -> Error {
         unreachable_unchecked()
     }
 
@@ -53,12 +53,12 @@ mod i {
     }
 
     #[inline]
-    pub fn catch_unwind<T>(f: impl FnOnce() -> T + UnwindSafe) -> Result<T, Error> {
+    pub fn catch_unwind<T>(_: impl FnOnce() -> T + UnwindSafe) -> Result<T, Error> {
         unsafe { rust_panicking_neither_abort_nor_std_feature_enabled() }
     }
 
     #[inline]
-    pub fn resume_unwind(payload: Error) -> ! {
+    pub fn resume_unwind(_: Error) -> ! {
         unsafe { rust_panicking_neither_abort_nor_std_feature_enabled() }
     }
 }
