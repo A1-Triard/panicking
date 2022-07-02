@@ -10,6 +10,7 @@
 //! The crate has two features — `"abort"` and `"std"`, and a final application
 //! should enable at least one of them, otherwise a linkage error will be emitted.
 
+#![cfg_attr(feature="abort", feature(never_type))]
 #![cfg_attr(feature="abort", feature(panic_abort))]
 
 #![deny(warnings)]
@@ -94,6 +95,7 @@ mod i {
 
 #[cfg(feature="abort")]
 mod i {
+    use core::hint::unreachable_unchecked;
     use core::panic::UnwindSafe;
 
     pub type Error = !;
@@ -102,7 +104,7 @@ mod i {
         e
     }
 
-    pub unsafe fn error_from_raw(e: usize) -> Error {
+    pub unsafe fn error_from_raw(_: usize) -> Error {
         unreachable_unchecked()
     }
 
@@ -112,7 +114,7 @@ mod i {
     }
 
     #[inline]
-    pub fn catch_unwind<T, E>(f: impl FnOnce() -> T + UnwindSafe) -> Result<T, Error> {
+    pub fn catch_unwind<T>(f: impl FnOnce() -> T + UnwindSafe) -> Result<T, Error> {
         Ok(f())
     }
 
@@ -129,6 +131,7 @@ mod i {
 /// and then passed to [`resume_unwind`].
 pub struct Error(i::Error);
 
+#[allow(unreachable_code)]
 impl Error {
     pub fn into_raw(self) -> usize {
         i::error_into_raw(self.0)
@@ -175,5 +178,6 @@ pub fn catch_unwind<T>(f: impl FnOnce() -> T + UnwindSafe) -> Result<T, Error> {
 /// this function can be used in the `no_std` context.
 #[inline]
 pub fn resume_unwind(payload: Error) -> ! {
+    #[allow(unreachable_code)]
     i::resume_unwind(payload.0)
 }
