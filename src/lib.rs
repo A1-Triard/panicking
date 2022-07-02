@@ -134,10 +134,19 @@ pub struct Error(i::Error);
 
 #[allow(unreachable_code)]
 impl Error {
+    /// Converts `Error` into the FFI-friendly representation.
+    ///
+    /// The result can be converted back with [`from_raw`](Error::from_raw).
     pub fn into_raw(self) -> usize {
         i::error_into_raw(self.0)
     }
 
+    /// Constructs `Error` from its low-level FFI-friendly representation.
+    ///
+    /// # Safety
+    ///
+    /// The `error` parameter should be a result
+    /// of [`into_raw`](Error::into_raw) method call.
     pub unsafe fn from_raw(error: usize) -> Self {
         Error(i::error_from_raw(error))
     }
