@@ -30,6 +30,7 @@ use core::panic::UnwindSafe;
 
 #[cfg(all(not(feature="abort"), not(feature="std")))]
 mod i {
+    use core::hint::unreachable_unchecked;
     use core::panic::UnwindSafe;
 
     pub type Error = !;
