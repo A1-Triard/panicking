@@ -1,11 +1,5 @@
-//! **Crate features**
-
-//! * `"std"`
-//! Enabled by default. Disable to make the library `#![no_std]`.
-//!
-//! * `"abort"`
-//! Enable to link the library with the (unstable) `panic_abort` standard
-//! crate, and make [`panicking`] always return `false`.
+//! ## Feature flags
+#![doc=document_features::document_features!()]
 //!
 //! The crate has two features — `"abort"` and `"std"`, and a final application
 //! should enable at least one of them, otherwise a linkage error will be emitted.
