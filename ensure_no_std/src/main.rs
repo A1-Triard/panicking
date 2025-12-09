@@ -1,12 +1,11 @@
-#![feature(start)]
-
 #![deny(warnings)]
 
 #![no_std]
+#![no_main]
 
 #[cfg(windows)]
 #[link(name="msvcrt")]
-extern { }
+extern "C" { }
 
 mod no_std {
     use core::panic::PanicInfo;
@@ -18,10 +17,11 @@ mod no_std {
     }
 }
 
+use core::ffi::{c_char, c_int};
 use panicking::panicking;
 
-#[start]
-pub fn main(_argc: isize, _argv: *const *const u8) -> isize {
+#[unsafe(no_mangle)]
+extern "C" fn main(_argc: c_int, _argv: *mut *mut c_char) -> c_int {
     assert!(!panicking());
     0
 }

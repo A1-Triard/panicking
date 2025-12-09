@@ -11,5 +11,5 @@ panic = "abort"
 panic = "abort"
 
 [dependencies]
-exit-no-std = "0.2.0"
+exit-no-std = "0.3.0"
 panicking = { path = "..", default-features = false, features = ["abort"] }
