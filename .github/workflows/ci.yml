@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        rust: ["1.81", stable, beta, nightly]
+        rust: ["1.91", stable, beta, nightly]
         features: ["", "--features=std"]
         abort: [false]
         include:
@@ -52,7 +52,6 @@ jobs:
       if: "${{ !matrix.abort }}"
     - run: "cargo doc --verbose --no-default-features ${{ matrix.features }}"
     - run: "cargo build --verbose --release --no-default-features ${{ matrix.features }}"
-    - run: "cargo outdated --verbose --root-deps-only --exit-code 1 ${{ matrix.features }}"
     - run: "cargo clippy --verbose --no-default-features ${{ matrix.features }}"
   ensure_no_std:
     strategy:
