@@ -18,25 +18,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         rust: ["1.91", stable, beta, nightly]
-        features: ["", "--features=std"]
-        abort: [false]
-        include:
-        - os: ubuntu-latest
-          rust: nightly
-          features: "--features=abort"
-          abort: true
-        - os: ubuntu-latest
-          rust: nightly
-          features: "--features=abort,std"
-          abort: true
-        - os: windows-latest
-          rust: nightly
-          features: "--features=abort"
-          abort: true
-        - os: windows-latest
-          rust: nightly
-          features: "--features=abort,std"
-          abort: true
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions-rs/toolchain@v1
@@ -45,14 +26,12 @@ jobs:
         override: true
     - run: "rustup component add clippy"
     - uses: actions/checkout@v2
-    - run: "cargo build --verbose --no-default-features ${{ matrix.features }}"
-    - run: "cargo test --verbose --tests --no-default-features ${{ matrix.features }}"
-      if: "${{ !matrix.abort }}"
-    - run: "cargo test --verbose --doc --no-default-features ${{ matrix.features }}"
-      if: "${{ !matrix.abort }}"
-    - run: "cargo doc --verbose --no-default-features ${{ matrix.features }}"
-    - run: "cargo build --verbose --release --no-default-features ${{ matrix.features }}"
-    - run: "cargo clippy --verbose --no-default-features ${{ matrix.features }}"
+    - run: "cargo build --verbose"
+    - run: "cargo test --verbose --tests"
+    - run: "cargo test --verbose --doc"
+    - run: "cargo doc --verbose"
+    - run: "cargo build --verbose --release"
+    - run: "cargo clippy --verbose"
   ensure_no_std:
     strategy:
       fail-fast: false
