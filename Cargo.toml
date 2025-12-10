@@ -1,7 +1,7 @@
 [package]
 edition = "2021"
 name = "panicking"
-version = "0.6.0"
+version = "0.7.0"
 rust-version = "1.91"
 authors = ["warlock <internalmike@gmail.com>"]
 description = "Provides a `std::thread::panicking` analog available in the `no_std` context."
@@ -11,17 +11,6 @@ keywords = ["panic", "panicking", "no_std"]
 categories = ["rust-patterns", "no-std"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/A1-Triard/panicking"
-
-[features]
-default = ["std"]
-## enable to link the library with the (unstable) `panic_abort` standard
-## crate, and make [`panicking`] always return `false`.
-abort = []
-## disable to make the library `#![no_std]`.
-std = []
-
-[dependencies]
-document-features = "0.2.7"
 
 [badges]
 maintenance = { status = "actively-developed" }

@@ -1,63 +1,18 @@
-//! ## Feature flags
-#![doc=document_features::document_features!()]
-//!
-//! The crate has two features — `"abort"` and `"std"`, and a final application
-//! should enable at least one of them, otherwise a linkage error will be emitted.
-
-#![cfg_attr(feature="abort", feature(never_type))]
-#![cfg_attr(feature="abort", feature(panic_abort))]
+#![cfg_attr(panic="abort", feature(never_type))]
 
 #![deny(warnings)]
 #![doc(test(attr(deny(warnings))))]
 #![doc(test(attr(allow(dead_code))))]
 #![doc(test(attr(allow(unused_variables))))]
 
-#![cfg_attr(not(feature="std"), no_std)]
+#![cfg_attr(panic="abort", no_std)]
 
-#[cfg(feature="std")]
+#[cfg(not(panic="abort"))]
 extern crate core;
-
-#[cfg(feature="abort")]
-extern crate panic_abort;
 
 use core::panic::UnwindSafe;
 
-#[cfg(all(not(feature="abort"), not(feature="std")))]
-mod i {
-    use core::hint::unreachable_unchecked;
-    use core::panic::UnwindSafe;
-
-    pub enum Error { }
-
-    pub fn error_into_raw(_: Error) -> usize {
-        unsafe { unreachable_unchecked() }
-    }
-
-    pub unsafe fn error_from_raw(_: usize) -> Error {
-        unreachable_unchecked()
-    }
-
-    extern "Rust" {
-        fn rust_panicking_neither_abort_nor_std_feature_enabled() -> !;
-    }
-
-    #[inline]
-    pub fn panicking() -> bool {
-        unsafe { rust_panicking_neither_abort_nor_std_feature_enabled() }
-    }
-
-    #[inline]
-    pub fn catch_unwind<T>(_: impl FnOnce() -> T + UnwindSafe) -> Result<T, Error> {
-        unsafe { rust_panicking_neither_abort_nor_std_feature_enabled() }
-    }
-
-    #[inline]
-    pub fn resume_unwind(_: Error) -> ! {
-        unsafe { rust_panicking_neither_abort_nor_std_feature_enabled() }
-    }
-}
-
-#[cfg(all(feature="std", not(feature="abort")))]
+#[cfg(not(panic="abort"))]
 mod i {
     use core::panic::UnwindSafe;
     use std::any::Any;
@@ -88,7 +43,7 @@ mod i {
     }
 }
 
-#[cfg(feature="abort")]
+#[cfg(panic="abort")]
 mod i {
     use core::hint::unreachable_unchecked;
     use core::panic::UnwindSafe;
